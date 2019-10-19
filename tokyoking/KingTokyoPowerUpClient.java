@@ -1,3 +1,4 @@
+package tokyoking;
 import java.util.*;
 import java.io.*;
 import java.net.*;

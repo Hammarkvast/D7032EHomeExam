@@ -8,7 +8,7 @@
             "type": "java",
             "name": "Run Client",
             "request": "launch",
-            "mainClass": "KingTokyoPowerUpClient",
+            "mainClass": "tokyoking.KingTokyoPowerUpClient",
             //"projectName": "mage-client",
             "cwd": "${workspaceFolder}",
             "args": "bot"
@@ -17,7 +17,7 @@
             "type": "java",
             "name": "Run Client2",
             "request": "launch",
-            "mainClass": "KingTokyoPowerUpClient",
+            "mainClass": "tokyoking.KingTokyoPowerUpClient",
             //"projectName": "mage-client",
             "cwd": "${workspaceFolder}",
             "args": "bot"
@@ -26,7 +26,7 @@
             "type": "java",
             "name": "Run Client3",
             "request": "launch",
-            "mainClass": "KingTokyoPowerUpClient",
+            "mainClass": "tokyoking.KingTokyoPowerUpClient",
             //"projectName": "mage-client",
             "cwd": "${workspaceFolder}",
             "args": "bot"
@@ -35,7 +35,7 @@
             "type": "java",
             "name": "Run Server",
             "request": "launch",
-            "mainClass": "KingTokyoPowerUpServer",
+            "mainClass": "tokyoking.KingTokyoPowerUpServer",
             //"projectName": "mage-server",
             "cwd": "${workspaceFolder}"
         }
