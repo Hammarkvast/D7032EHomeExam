@@ -54,11 +54,11 @@ public class KingTokyoPowerUpServer {
                 Socket connectionSocket = aSocket.accept();
                 BufferedReader inFromClient = new BufferedReader(new InputStreamReader(connectionSocket.getInputStream()));
                 DataOutputStream outToClient = new DataOutputStream(connectionSocket.getOutputStream());
-                outToClient.writeBytes("You are the monster: " + monster.get(onlineClient).name + "\n");
+                outToClient.writeBytes("You are the monster: " + monster.get(onlineClient).getName() + "\n");
                 monster.get(onlineClient).connection = connectionSocket;
                 monster.get(onlineClient).inFromClient = inFromClient;
                 monster.get(onlineClient).outToClient = outToClient;
-                System.out.println("Connected to " + monster.get(onlineClient).name);
+                System.out.println("Connected to " + monster.get(onlineClient).getName());
             }
         } catch (Exception e) {}
 
@@ -86,17 +86,19 @@ public class KingTokyoPowerUpServer {
         while(true) {
             for(int i=0; i<monster.size(); i++) {
                 Monster currentMonster = monster.get(i);
-                if(currentMonster.currentHealth <= 0) {
-                    currentMonster.inTokyo = false;
+                if(currentMonster.getCurrentHealth() == 0) {
+                    currentMonster.setInTokyo(false);
                     continue;
                 }
                 // pre: Award a monster in Tokyo 1 star
-                if(currentMonster.inTokyo) {currentMonster.stars += 1;}
-                String statusUpdate = "You are " + currentMonster.name + " and it is your turn. Here are the stats";
+                if(currentMonster.getInTokyo()){
+                    increaseStars(currentMonster);
+                }
+                String statusUpdate = "You are " + currentMonster.getName() + " and it is your turn. Here are the stats";
                 for(int count=0; count<3; count++) {
-                    statusUpdate += ":"+monster.get(count).name + (monster.get(count).inTokyo?" is in Tokyo ":" is not in Tokyo ");
-                    statusUpdate += "with " + monster.get(count).currentHealth + " health, " + monster.get(count).stars + " stars, ";
-                    statusUpdate += monster.get(count).energy + " energy, and owns the following cards:";
+                    statusUpdate += ":"+monster.get(count).getName() + (monster.get(count).getInTokyo()?" is in Tokyo ":" is not in Tokyo ");
+                    statusUpdate += "with " + monster.get(count).getCurrentHealth() + " health, " + monster.get(count).getStars() + " stars, ";
+                    statusUpdate += monster.get(count).getEnergy() + " energy, and owns the following cards:";
                     statusUpdate += monster.get(count).cardsToString();
                 }
                 sendMessage(i, statusUpdate+"\n");
@@ -131,41 +133,42 @@ public class KingTokyoPowerUpServer {
                 // 6a. Hearts = health (max 10 unless a cord increases it)
                 Dice aHeart = new Dice(Dice.HEART);
                 if(result.containsKey(aHeart)) { //+1 currentHealth per heart, up to maxHealth
-                    if(currentMonster.currentHealth + result.get(aHeart).intValue() >= currentMonster.maxHealth) {
-                        currentMonster.currentHealth = currentMonster.maxHealth;
+                    if(currentMonster.getCurrentHealth() + result.get(aHeart).intValue() >= currentMonster.getMaxHealth()) {
+                        currentMonster.setCurrentHealth(currentMonster.getMaxHealth());
                     } else {
-                        currentMonster.currentHealth += result.get(aHeart).intValue();
+//                        currentMonster.currentHealth += result.get(aHeart).intValue();
+                        currentMonster.setCurrentHealth(currentMonster.getCurrentHealth() + result.get(aHeart).intValue());
                     }
                     // 6b. 3 hearts = power-up
                     if(result.get(aHeart).intValue() >= 3) {
                         // Deal a power-up card to the currentMonster
-                        if(currentMonster.name.equals("Kong")) {
+                        if(currentMonster.getName().equals("Kong")) {
                             //Todo: Add support for more cards.
                             //Current support is only for the Red Dawn card
                             //Add support for keeping it secret until played
                             String power = sendMessage(i, "POWERUP:Deal 2 damage to all others\n");
                             for(int mon=0; mon<monster.size(); mon++) {
-                                if(mon!=i) {monster.get(mon).currentHealth+=-2;}
+                                if(mon!=i) {monster.get(mon).setCurrentHealth(monster.get(mon).getCurrentHealth()-2);}
                             }
                         }
-                        if(currentMonster.name.equals("Gigazaur")) {
+                        if(currentMonster.getName().equals("Gigazaur")) {
                             //Todo: Add support for more cards.
                             //Current support is only for the Radioactive Waste
                             //Add support for keeping it secret until played
                             String power = sendMessage(i, "POWERUP:Receive 2 energy and 1 health\n");
-                            currentMonster.energy += 2;
-                            if(currentMonster.currentHealth + 1 >= currentMonster.maxHealth) {
-                                currentMonster.currentHealth = currentMonster.maxHealth;
+                            currentMonster.setEnergy(currentMonster.getEnergy() + 2);
+                            if(currentMonster.getCurrentHealth() + 1 >= currentMonster.getMaxHealth()) {
+                                currentMonster.setCurrentHealth(currentMonster.getMaxHealth());
                             } else {
-                                currentMonster.currentHealth += 1;
+                                currentMonster.setCurrentHealth(currentMonster.getCurrentHealth()+1);
                             }    
                         }
-                        if(currentMonster.name.equals("Alienoid")) {
+                        if(currentMonster.getName().equals("Alienoid")) {
                             //Todo: Add support for more cards.
                             //Current support is only for the Alien Scourge
                             //Add support for keeping it secret until played
                             String power = sendMessage(i, "POWERUP:Receive 2 stars\n");
-                            currentMonster.stars+=2;
+                            currentMonster.setStars(currentMonster.getStars()+2);
                         }
                     }
                 }
@@ -173,75 +176,82 @@ public class KingTokyoPowerUpServer {
                 for(int num = 1; num < 4; num++) {
                     if(result.containsKey(new Dice(num)))
                         if(result.get(new Dice(num)).intValue() >= 3)
-                            currentMonster.stars += num + (result.get(new Dice(num)).intValue()-3);                    
+                            currentMonster.setStars(currentMonster.getStars()+num+(result.get(new Dice(num)).intValue()-3));                 
                 }
                 // 6d. claws = attack (if in Tokyo attack everyone, else attack monster in Tokyo)
                 Dice aClaw = new Dice(Dice.CLAWS);
                 if(result.containsKey(aClaw)) {
-                    currentMonster.stars += currentMonster.cardEffect("starsWhenAttacking"); //Alpha Monster
-                    if(currentMonster.inTokyo) {
+                //    currentMonster.stars += currentMonster.cardEffect("starsWhenAttacking"); //Alpha Monster
+                    currentMonster.setStars(currentMonster.getStars() + currentMonster.cardEffect("starsWhenAttacking")); //Alpha Monster
+                    if(currentMonster.getInTokyo()) {
                         for(int mon=0; mon<monster.size(); mon++) {
                             int moreDamage = currentMonster.cardEffect("moreDamage"); //Acid Attack
                             int totalDamage = result.get(aClaw).intValue()+moreDamage;
                             if(mon!=i && totalDamage > monster.get(mon).cardEffect("armor")) { //Armor Plating
-                                monster.get(mon).currentHealth+=-totalDamage;
+                               // monster.get(mon).currentHealth+=-totalDamage;
+                                monster.get(mon).setCurrentHealth(monster.get(mon).getCurrentHealth()-totalDamage);
                             }
                         }
                     }
                     else {
                         boolean monsterInTokyo = false;
                         for(int mon=0; mon<monster.size(); mon++) {
-                            if(monster.get(mon).inTokyo){
+                            if(monster.get(mon).getInTokyo()){
                                 monsterInTokyo = true;
                                 int moreDamage = currentMonster.cardEffect("moreDamage"); //Acid Attack
                                 int totalDamage = result.get(aClaw).intValue()+moreDamage;
                                 if(totalDamage > monster.get(mon).cardEffect("armor")) //Armor Plating
-                                    monster.get(mon).currentHealth+=-totalDamage;
+                                    //monster.get(mon).currentHealth+=-totalDamage;
+                                    monster.get(mon).setCurrentHealth(monster.get(mon).getCurrentHealth()-totalDamage);
                                 // 6e. If you were outside, then the monster inside tokyo may decide to leave Tokyo
                                 String answer = sendMessage(mon, "ATTACKED:You have " + 
-                                    monster.get(mon).currentHealth + " health left. Do you wish to leave Tokyo? [YES/NO]\n");
+                                    //monster.get(mon).currentHealth + " health left. Do you wish to leave Tokyo? [YES/NO]\n");
+                                    monster.get(mon).getCurrentHealth() + " health left. Do you wish to leave Tokyo? [YES/NO]\n");
                                 if(answer.equalsIgnoreCase("YES")) {
-                                    monster.get(mon).inTokyo = false;
+                                    monster.get(mon).setInTokyo(false);
                                     monsterInTokyo = false;
                                 }
                             }
                         }
                         if(!monsterInTokyo) {
-                            currentMonster.inTokyo = true;
-                            currentMonster.stars +=1;
+                            currentMonster.setInTokyo(true);
+                            increaseStars(currentMonster);
                         }
                     }
                 }
                 // 6f. energy = energy tokens
                 Dice anEnergy = new Dice(Dice.ENERGY);
                 if(result.containsKey(anEnergy))
-                    currentMonster.energy += result.get(anEnergy).intValue();
+                    //currentMonster.energy += result.get(anEnergy).intValue();
+                    currentMonster.setEnergy(currentMonster.getEnergy()+result.get(anEnergy).intValue());
                 // 7. Decide to buy things for energy
-                String msg = "PURCHASE:Do you want to buy any of the cards from the store? (you have " + currentMonster.energy + " energy) [#/-1]:" + deck + "\n";
+                String msg = "PURCHASE:Do you want to buy any of the cards from the store? (you have " + currentMonster.getEnergy() + " energy) [#/-1]:" + deck + "\n";
                 String answer = sendMessage(i, msg);
                 int buy = Integer.parseInt(answer);
-                if(buy>0 && (currentMonster.energy >= (deck.store[buy].cost - currentMonster.cardEffect("cardsCostLess")))) { //Alien Metabolism
+                if(buy>0 && (currentMonster.getEnergy() >= (deck.store[buy].cost - currentMonster.cardEffect("cardsCostLess")))) { //Alien Metabolism
                     if(deck.store[buy].discard) {
                         //7a. Play "DISCARD" cards immediately
-                        currentMonster.stars += deck.store[buy].effect.stars;
+                        //currentMonster.stars += deck.store[buy].effect.stars;
+                        currentMonster.setStars(currentMonster.getStars() + deck.store[buy].effect.stars);
                     } else
                         currentMonster.cards.add(deck.store[buy]);
                     //Deduct the cost of the card from energy
-                    currentMonster.energy += -(deck.store[buy].cost-currentMonster.cardEffect("cardsCostLess")); //Alient Metabolism
+                   // currentMonster.energy += -(deck.store[buy].cost-currentMonster.cardEffect("cardsCostLess")); //Alient Metabolism
+                    currentMonster.setEnergy(currentMonster.getEnergy()-(deck.store[buy].cost - currentMonster.cardEffect("cardsCostLess")));
                     //Draw a new card from the deck to replace the card that was bought
                     deck.store[buy] = deck.deck.remove(0);
                 }
                 //8. Check victory conditions
                 int alive=0; String aliveMonster = "";
                 for(int mon=0; mon<monster.size(); mon++) {
-                    if(monster.get(mon).stars >= 20) {
+                    if(monster.get(mon).getStars() >= 20) {
                         for(int victory=0; victory<monster.size(); victory++) {
-                            String victoryByStars = sendMessage(victory, "Victory: " + monster.get(mon).name + " has won by stars\n");
+                            String victoryByStars = sendMessage(victory, "Victory: " + monster.get(mon).getName() + " has won by stars\n");
                         }
                         System.exit(0);
                     }
-                    if(monster.get(mon).currentHealth > 0) {
-                        alive++; aliveMonster = monster.get(mon).name;
+                    if(monster.get(mon).getCurrentHealth() > 0) {
+                        alive++; aliveMonster = monster.get(mon).getName();
                     }
                 }
                 if(alive==1) {
@@ -280,4 +290,11 @@ public class KingTokyoPowerUpServer {
         return dice;
     }
     
+private void increaseStars(Monster monster){
+//    monster.stars +=1;
+    monster.setStars(monster.getStars()+1);
+}
+
+private void statusUpdate(Monster monster, ArrayList<Monster> monsterList){}
+
 }

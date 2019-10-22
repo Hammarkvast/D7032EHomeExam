@@ -9,12 +9,12 @@ import tokyoking.cards.*;
 import tokyoking.effects.*;
 
 public class Monster {
-    public int maxHealth = 10;
-    public int currentHealth = 10;
-    public String name;
-    public int energy = 0;
-    public int stars = 0;
-    public boolean inTokyo = false;
+    private int maxHealth = 10;
+    private int currentHealth = 10;
+    private String name;
+    private int energy = 0;
+    private int stars = 0;
+    private boolean inTokyo = false;
     public ArrayList<Card> cards = new ArrayList<Card>();
     public Socket connection = null;
     public BufferedReader inFromClient = null;
@@ -44,4 +44,54 @@ public class Monster {
         for(int i=0; i<cards.size(); i++) {returnString += "\t["+i+"] " + cards.get(i) + ":";}
         return returnString;           
     }
+
+    public String getName(){
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getStars(){
+        return stars;
+    }
+
+    public void setStars(int stars) {
+        this.stars = stars;
+    }
+
+    public int getCurrentHealth(){
+        return currentHealth;
+    }
+
+
+    public void setCurrentHealth(int currentHealth) {
+        this.currentHealth = currentHealth;
+    }
+
+    public int getEnergy() {
+        return energy;
+    }
+
+    public void setEnergy(int energy) {
+        this.energy = energy;
+    }
+
+    public boolean getInTokyo(){
+        return inTokyo;
+    }
+
+    public void setInTokyo(boolean inTokyo) {
+        this.inTokyo = inTokyo;
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
+    }
+
+    public void setMaxHealth(int maxHealth) {
+        this.maxHealth = maxHealth;
+    }
+
 }

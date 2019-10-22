@@ -20,4 +20,5 @@ package tokyoking.dice;
         public int hashCode() {
             return toString().hashCode();
         }
+
     }
