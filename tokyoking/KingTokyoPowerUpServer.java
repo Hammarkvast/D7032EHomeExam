@@ -33,7 +33,7 @@ public class KingTokyoPowerUpServer {
     private ArrayList<Monster> monster = new ArrayList<Monster>();
     private Random ran = new Random();
     private Scanner sc = new Scanner(System.in);
-
+    private ArrayList<Dice> dice = new ArrayList<Dice>();
     
     public KingTokyoPowerUpServer() {
         Monster kong = new Monster("Kong");
@@ -103,7 +103,7 @@ public class KingTokyoPowerUpServer {
                 }
                 sendMessage(i, statusUpdate+"\n");
                 // 1. Roll 6 dice
-                ArrayList<Dice> dice = new ArrayList<Dice>();
+                //ArrayList<Dice> dice = new ArrayList<Dice>();
                 dice = diceRoll(6);
                 // 2. Decide which dice to keep
                 String rolledDice = "ROLLED:You rolled:\t[1]\t[2]\t[3]\t[4]\t[5]\t[6]:";
@@ -228,18 +228,18 @@ public class KingTokyoPowerUpServer {
                 String msg = "PURCHASE:Do you want to buy any of the cards from the store? (you have " + currentMonster.getEnergy() + " energy) [#/-1]:" + deck + "\n";
                 String answer = sendMessage(i, msg);
                 int buy = Integer.parseInt(answer);
-                if(buy>0 && (currentMonster.getEnergy() >= (deck.store[buy].cost - currentMonster.cardEffect("cardsCostLess")))) { //Alien Metabolism
-                    if(deck.store[buy].discard) {
+                if(buy>0 && (currentMonster.getEnergy() >= (deck.getCard(buy).getCost() - currentMonster.cardEffect("cardsCostLess")))) { //Alien Metabolism
+                    if(deck.getCard(buy).getDiscard()) {
                         //7a. Play "DISCARD" cards immediately
                         //currentMonster.stars += deck.store[buy].effect.stars;
-                        currentMonster.setStars(currentMonster.getStars() + deck.store[buy].effect.stars);
+                        currentMonster.setStars(currentMonster.getStars() + deck.getCard(buy).getEffect().getStars());
                     } else
-                        currentMonster.cards.add(deck.store[buy]);
+                        currentMonster.cards.add(deck.getCard(buy));
                     //Deduct the cost of the card from energy
                    // currentMonster.energy += -(deck.store[buy].cost-currentMonster.cardEffect("cardsCostLess")); //Alient Metabolism
-                    currentMonster.setEnergy(currentMonster.getEnergy()-(deck.store[buy].cost - currentMonster.cardEffect("cardsCostLess")));
+                    currentMonster.setEnergy(currentMonster.getEnergy()-(deck.getCard(buy).getCost() - currentMonster.cardEffect("cardsCostLess")));
                     //Draw a new card from the deck to replace the card that was bought
-                    deck.store[buy] = deck.deck.remove(0);
+                    deck.setCard(buy,deck.getDeck().remove(0));
                 }
                 //8. Check victory conditions
                 int alive=0; String aliveMonster = "";
@@ -290,11 +290,9 @@ public class KingTokyoPowerUpServer {
         return dice;
     }
     
-private void increaseStars(Monster monster){
+    private void increaseStars(Monster monster){
 //    monster.stars +=1;
-    monster.setStars(monster.getStars()+1);
-}
-
-private void statusUpdate(Monster monster, ArrayList<Monster> monsterList){}
+        monster.setStars(monster.getStars()+1);
+    }
 
 }

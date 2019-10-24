@@ -1,9 +1,49 @@
 package tokyoking.effects;
 
 public class Effect {
-    public int moreDamage = 0; //Acid Attack
-    public int cardsCostLess = 0; //Alien Metabolism
-    public int starsWhenAttacking = 0; //Alpha monster
-    public int stars = 0; //Apartment Building, Commuter Train, Corner Stone
-    public int armor = 0; //Armor Plating
+    private int moreDamage = 0; //Acid Attack
+    private int cardsCostLess = 0; //Alien Metabolism
+    private int starsWhenAttacking = 0; //Alpha monster
+    private int stars = 0; //Apartment Building, Commuter Train, Corner Stone
+    private int armor = 0; //Armor Plating
+
+    public int getMoreDamage() {
+        return moreDamage;
+    }
+
+    public void setMoreDamage(int moreDamage) {
+        this.moreDamage = moreDamage;
+    }
+ 
+    public int getCardsCostLess() {
+        return cardsCostLess;
+    }
+ 
+    public void setCardsCostLess(int cardsCostLess) {
+        this.cardsCostLess = cardsCostLess;
+    }
+
+    public int getStarsWhenAttacking() {
+        return starsWhenAttacking;
+    }
+
+    public void setStarsWhenAttacking(int starsWhenAttacking) {
+        this.starsWhenAttacking = starsWhenAttacking;
+    }
+
+    public int getStars() {
+        return stars;
+    }
+
+    public void setStars(int stars) {
+        this.stars = stars;
+    }
+
+    public int getArmor() {
+        return armor;
+    }
+
+    public void setArmor(int armor) {
+        this.armor = armor;
+    }
 }

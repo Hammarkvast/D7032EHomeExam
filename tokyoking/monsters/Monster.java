@@ -29,8 +29,8 @@ public class Monster {
         for(int i=0; i<cards.size(); i++) {
             try {
                 //Find variable by "name"
-                 if(Effect.class.getField(effectName).getInt(cards.get(i).effect) > 0) {
-                     return Effect.class.getField(effectName).getInt(cards.get(i).effect);
+                 if(Effect.class.getField(effectName).getInt(cards.get(i).getEffect()) > 0) {
+                     return Effect.class.getField(effectName).getInt(cards.get(i).getEffect());
                  }
             } catch (Exception e) {}
         }

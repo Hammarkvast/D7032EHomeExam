@@ -6,17 +6,17 @@ import tokyoking.cards.Card;
 import tokyoking.effects.Effect;
 
 public class Deck {
-        public ArrayList<Card> deck = new ArrayList<Card>();
-        public Card[] store = new Card[3];
+        private ArrayList<Card> deck = new ArrayList<Card>();
+        private Card[] store = new Card[3];
         
         public Deck() {
-            Effect moreDamage = new Effect(); moreDamage.moreDamage = 1;
-            Effect cardsCostLess = new Effect(); cardsCostLess.cardsCostLess = 1;
-            Effect starsWhenAttacking = new Effect(); starsWhenAttacking.starsWhenAttacking = 1;
-            Effect stars3 = new Effect(); stars3.stars = 3;
-            Effect armor = new Effect(); armor.armor = 1;
-            Effect stars2 = new Effect(); stars2.stars = 2;
-            Effect stars1 = new Effect(); stars1.stars = 1;
+            Effect moreDamage = new Effect(); moreDamage.setMoreDamage(1);
+            Effect cardsCostLess = new Effect(); cardsCostLess.setCardsCostLess(1);
+            Effect starsWhenAttacking = new Effect(); starsWhenAttacking.setStarsWhenAttacking(1);
+            Effect stars3 = new Effect(); stars3.setStars(3);
+            Effect armor = new Effect(); armor.setArmor(1);
+            Effect stars2 = new Effect(); stars2.setStars(2);
+            Effect stars1 = new Effect(); stars1.setStars(1);
             deck.add(new Card("Acid Attack", 6, false, moreDamage, "Deal 1 extra damage each turn"));
             deck.add(new Card("Alien Metabolism", 3, false, cardsCostLess, "Buying cards costs you 1 less"));
             deck.add(new Card("Alpha Monster", 5, false, starsWhenAttacking, "Gain 1 star when you attack"));
@@ -34,5 +34,29 @@ public class Deck {
             String returnString = "";
             for(int i=0; i<3; i++) {returnString += "\t["+i+"] " + store[i] + ":";}
             return returnString;
+        }
+
+        public ArrayList<Card> getDeck() {
+            return deck;
+        }
+
+        public void setDeck(ArrayList<Card> deck) {
+            this.deck = deck;
+        }
+
+        public Card[] getStore() {
+            return store;
+        }
+
+        public void setStore(Card[] store) {
+            this.store = store;
+        }
+
+        public Card getCard(int index){
+            return store[index];
+        }
+
+        public void setCard(int index, Card newCard){
+            this.store[index] = newCard;
         }
     }
