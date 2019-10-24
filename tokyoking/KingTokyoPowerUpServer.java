@@ -34,7 +34,10 @@ public class KingTokyoPowerUpServer {
     private Random ran = new Random();
     private Scanner sc = new Scanner(System.in);
     private ArrayList<Dice> dice = new ArrayList<Dice>();
-    
+    private Monster currentMonster;
+    private String statusUpdate;
+    private boolean monsterInTokyo = false;
+
     public KingTokyoPowerUpServer() {
         Monster kong = new Monster("Kong");
         Monster gigazaur = new Monster("Gigazaur");
@@ -85,7 +88,7 @@ public class KingTokyoPowerUpServer {
         */        
         while(true) {
             for(int i=0; i<monster.size(); i++) {
-                Monster currentMonster = monster.get(i);
+                currentMonster = monster.get(i);
                 if(currentMonster.getCurrentHealth() == 0) {
                     currentMonster.setInTokyo(false);
                     continue;
@@ -94,13 +97,7 @@ public class KingTokyoPowerUpServer {
                 if(currentMonster.getInTokyo()){
                     increaseStars(currentMonster);
                 }
-                String statusUpdate = "You are " + currentMonster.getName() + " and it is your turn. Here are the stats";
-                for(int count=0; count<3; count++) {
-                    statusUpdate += ":"+monster.get(count).getName() + (monster.get(count).getInTokyo()?" is in Tokyo ":" is not in Tokyo ");
-                    statusUpdate += "with " + monster.get(count).getCurrentHealth() + " health, " + monster.get(count).getStars() + " stars, ";
-                    statusUpdate += monster.get(count).getEnergy() + " energy, and owns the following cards:";
-                    statusUpdate += monster.get(count).cardsToString();
-                }
+                statusUpdate = statusUpdate();
                 sendMessage(i, statusUpdate+"\n");
                 // 1. Roll 6 dice
                 //ArrayList<Dice> dice = new ArrayList<Dice>();
@@ -194,9 +191,9 @@ public class KingTokyoPowerUpServer {
                         }
                     }
                     else {
-                        boolean monsterInTokyo = false;
                         for(int mon=0; mon<monster.size(); mon++) {
                             if(monster.get(mon).getInTokyo()){
+                                System.out.println("hej");
                                 monsterInTokyo = true;
                                 int moreDamage = currentMonster.cardEffect("moreDamage"); //Acid Attack
                                 int totalDamage = result.get(aClaw).intValue()+moreDamage;
@@ -214,6 +211,7 @@ public class KingTokyoPowerUpServer {
                             }
                         }
                         if(!monsterInTokyo) {
+                            System.out.println("you get a star!");
                             currentMonster.setInTokyo(true);
                             increaseStars(currentMonster);
                         }
@@ -295,4 +293,14 @@ public class KingTokyoPowerUpServer {
         monster.setStars(monster.getStars()+1);
     }
 
+    private String statusUpdate(){
+        String statusUpdate = "You are " + currentMonster.getName() + " and it is your turn. Here are the stats";
+        for(int count=0; count<3; count++) {
+            statusUpdate += ":"+monster.get(count).getName() + (monster.get(count).getInTokyo()?" is in Tokyo ":" is not in Tokyo ");
+            statusUpdate += "with " + monster.get(count).getCurrentHealth() + " health, " + monster.get(count).getStars() + " stars, ";
+            statusUpdate += monster.get(count).getEnergy() + " energy, and owns the following cards:";
+            statusUpdate += monster.get(count).cardsToString();
+        }
+        return statusUpdate;
+    }
 }
