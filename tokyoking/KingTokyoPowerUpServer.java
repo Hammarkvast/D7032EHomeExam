@@ -37,6 +37,12 @@ public class KingTokyoPowerUpServer {
     private Monster currentMonster;
     private String statusUpdate;
     private boolean monsterInTokyo = false;
+    private String rolledDice;
+    private HashMap<Dice, Integer> result;
+
+    private Dice aHeart = new Dice(Dice.HEART);
+    private Dice aClaw = new Dice(Dice.CLAWS);
+    private Dice anEnergy = new Dice(Dice.ENERGY);
 
     public KingTokyoPowerUpServer() {
         Monster kong = new Monster("Kong");
@@ -103,7 +109,7 @@ public class KingTokyoPowerUpServer {
                 //ArrayList<Dice> dice = new ArrayList<Dice>();
                 dice = diceRoll(6);
                 // 2. Decide which dice to keep
-                String rolledDice = "ROLLED:You rolled:\t[1]\t[2]\t[3]\t[4]\t[5]\t[6]:";
+                rolledDice = "ROLLED:You rolled:\t[1]\t[2]\t[3]\t[4]\t[5]\t[6]:";
                 for(int allDice=0; allDice<dice.size(); allDice++) {rolledDice+="\t["+dice.get(allDice)+"]";}
                 rolledDice += ":Choose which dice to reroll, separate with comma and in decending order (e.g. 5,4,1   0 to skip)\n";
                 String[] reroll = sendMessage(i, rolledDice).split(",");
@@ -122,13 +128,13 @@ public class KingTokyoPowerUpServer {
                 dice.addAll(diceRoll(6-dice.size()));
                 // 6. Sum up totals
                 Collections.sort(dice);
-                HashMap<Dice, Integer> result = new HashMap<Dice, Integer>();
+                result = new HashMap<Dice, Integer>();
                 for(Dice unique : new HashSet<Dice>(dice)) {
                      result.put(unique, Collections.frequency(dice, unique));
                 }
                 String ok = sendMessage(i, "ROLLED:You rolled " + result + " Press [ENTER]\n");
                 // 6a. Hearts = health (max 10 unless a cord increases it)
-                Dice aHeart = new Dice(Dice.HEART);
+                //Dice aHeart = new Dice(Dice.HEART);
                 if(result.containsKey(aHeart)) { //+1 currentHealth per heart, up to maxHealth
                     if(currentMonster.getCurrentHealth() + result.get(aHeart).intValue() >= currentMonster.getMaxHealth()) {
                         currentMonster.setCurrentHealth(currentMonster.getMaxHealth());
@@ -176,7 +182,7 @@ public class KingTokyoPowerUpServer {
                             currentMonster.setStars(currentMonster.getStars()+num+(result.get(new Dice(num)).intValue()-3));                 
                 }
                 // 6d. claws = attack (if in Tokyo attack everyone, else attack monster in Tokyo)
-                Dice aClaw = new Dice(Dice.CLAWS);
+                //Dice aClaw = new Dice(Dice.CLAWS);
                 if(result.containsKey(aClaw)) {
                 //    currentMonster.stars += currentMonster.cardEffect("starsWhenAttacking"); //Alpha Monster
                     currentMonster.setStars(currentMonster.getStars() + currentMonster.cardEffect("starsWhenAttacking")); //Alpha Monster
@@ -218,7 +224,7 @@ public class KingTokyoPowerUpServer {
                     }
                 }
                 // 6f. energy = energy tokens
-                Dice anEnergy = new Dice(Dice.ENERGY);
+                //Dice anEnergy = new Dice(Dice.ENERGY);
                 if(result.containsKey(anEnergy))
                     //currentMonster.energy += result.get(anEnergy).intValue();
                     currentMonster.setEnergy(currentMonster.getEnergy()+result.get(anEnergy).intValue());
@@ -226,7 +232,7 @@ public class KingTokyoPowerUpServer {
                 String msg = "PURCHASE:Do you want to buy any of the cards from the store? (you have " + currentMonster.getEnergy() + " energy) [#/-1]:" + deck + "\n";
                 String answer = sendMessage(i, msg);
                 int buy = Integer.parseInt(answer);
-                if(buy>0 && (currentMonster.getEnergy() >= (deck.getCard(buy).getCost() - currentMonster.cardEffect("cardsCostLess")))) { //Alien Metabolism
+                if(buy>=0 && (currentMonster.getEnergy() >= (deck.getCard(buy).getCost() - currentMonster.cardEffect("cardsCostLess")))) { //Alien Metabolism
                     if(deck.getCard(buy).getDiscard()) {
                         //7a. Play "DISCARD" cards immediately
                         //currentMonster.stars += deck.store[buy].effect.stars;
