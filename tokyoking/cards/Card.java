@@ -1,7 +1,7 @@
 package tokyoking.cards;
 import tokyoking.effects.Effect;
 
-public abstract class Card {
+public class Card {
 
     private String name;
     private int cost;

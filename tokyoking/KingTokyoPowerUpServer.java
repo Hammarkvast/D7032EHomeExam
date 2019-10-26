@@ -13,6 +13,9 @@ import java.util.Scanner;
 
 import tokyoking.cards.Card;
 import tokyoking.effects.Effect;
+import tokyoking.monsters.Alienoid;
+import tokyoking.monsters.Gigazaur;
+import tokyoking.monsters.Kong;
 import tokyoking.monsters.Monster;
 import tokyoking.dice.Dice;
 import tokyoking.deck.Deck;
@@ -45,12 +48,13 @@ public class KingTokyoPowerUpServer {
     private Dice anEnergy = new Dice(Dice.ENERGY);
 
     public KingTokyoPowerUpServer() {
-        Monster kong = new Monster("Kong");
-        Monster gigazaur = new Monster("Gigazaur");
-        Monster alien = new Monster("Alienoid");
+        Monster kong = new Kong();
+        Monster gigazaur = new Gigazaur();
+        Monster alien = new Alienoid();
         monster.add(kong);
         monster.add(gigazaur);
         monster.add(alien);
+        
         //Shuffle which player is which monster
         Collections.shuffle(monster);
         Deck deck = new Deck();
@@ -149,29 +153,19 @@ public class KingTokyoPowerUpServer {
                             //Todo: Add support for more cards.
                             //Current support is only for the Red Dawn card
                             //Add support for keeping it secret until played
-                            String power = sendMessage(i, "POWERUP:Deal 2 damage to all others\n");
-                            for(int mon=0; mon<monster.size(); mon++) {
-                                if(mon!=i) {monster.get(mon).setCurrentHealth(monster.get(mon).getCurrentHealth()-2);}
-                            }
+                            redDawn(i);
                         }
                         if(currentMonster.getName().equals("Gigazaur")) {
                             //Todo: Add support for more cards.
                             //Current support is only for the Radioactive Waste
                             //Add support for keeping it secret until played
-                            String power = sendMessage(i, "POWERUP:Receive 2 energy and 1 health\n");
-                            currentMonster.setEnergy(currentMonster.getEnergy() + 2);
-                            if(currentMonster.getCurrentHealth() + 1 >= currentMonster.getMaxHealth()) {
-                                currentMonster.setCurrentHealth(currentMonster.getMaxHealth());
-                            } else {
-                                currentMonster.setCurrentHealth(currentMonster.getCurrentHealth()+1);
-                            }    
+                            radioactiveWaste(i);    
                         }
                         if(currentMonster.getName().equals("Alienoid")) {
                             //Todo: Add support for more cards.
                             //Current support is only for the Alien Scourge
                             //Add support for keeping it secret until played
-                            String power = sendMessage(i, "POWERUP:Receive 2 stars\n");
-                            currentMonster.setStars(currentMonster.getStars()+2);
+                            theAlienScourge(i);
                         }
                     }
                 }
@@ -294,6 +288,30 @@ public class KingTokyoPowerUpServer {
         return dice;
     }
     
+    private void redDawn(int index){
+        String power = sendMessage(index, "POWERUP:Deal 2 damage to all others\n");
+        for(int mon=0; mon<monster.size(); mon++) {
+            if(mon!=index) {
+                monster.get(mon).setCurrentHealth(monster.get(mon).getCurrentHealth()-2);
+            }
+        }        
+    }
+
+    private void theAlienScourge(int index){
+        sendMessage(index, "POWERUP:Receive 2 stars\n");
+        currentMonster.setStars(currentMonster.getStars()+2);        
+    }
+
+    private void radioactiveWaste(int index){
+        sendMessage(index, "POWERUP:Receive 2 energy and 1 health\n");
+        currentMonster.setEnergy(currentMonster.getEnergy() + 2);
+        if(currentMonster.getCurrentHealth() + 1 >= currentMonster.getMaxHealth()) {
+            currentMonster.setCurrentHealth(currentMonster.getMaxHealth());
+        } else {
+            currentMonster.setCurrentHealth(currentMonster.getCurrentHealth()+1);
+        }          
+    }
+
     private void increaseStars(Monster monster){
 //    monster.stars +=1;
         monster.setStars(monster.getStars()+1);
