@@ -30,6 +30,19 @@ public class Deck {
             for(int i=0; i<3; i++) {returnString += "\t["+i+"] " + store[i] + ":";}
             return returnString;
         }
+        
+        public void resetStore(Deck deck){
+            ArrayList<Card>fullDeck = deck.getDeck();
+            for(int storeCard = 0; storeCard < 3; storeCard++){
+                fullDeck.add(deck.getStoreCard(storeCard));
+                deck.setDeck(fullDeck);
+            }
+            Collections.shuffle(fullDeck);
+            for (int i = 0; i < 3; i++){
+                store[i] = fullDeck.get(i);
+            }
+        
+        }
 
         public ArrayList<Card> getDeck() {    
             return deck;
@@ -47,11 +60,12 @@ public class Deck {
             this.store = store;
         }
 
-        public Card getCard(int index){
+        public Card getStoreCard(int index){
             return store[index];
         }
 
-        public void setCard(int index, Card newCard){
+        public void setStoreCard(int index, Card newCard){
             this.store[index] = newCard;
         }
+
     }
