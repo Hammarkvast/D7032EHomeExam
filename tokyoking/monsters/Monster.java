@@ -1,14 +1,17 @@
 package tokyoking.monsters;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-//import java.io.InputStreamReader;
-//import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import tokyoking.cards.*;
 import tokyoking.effects.*;
-
+/**
+ * @author Tom Hammarkvist
+ */
 public class Monster {
+    /**
+     * The starting values a monster has when first starting the game. 
+     */
     private int maxHealth = 10;
     private int currentHealth = 10;
     private String name;
@@ -19,7 +22,10 @@ public class Monster {
     public Socket connection = null;
     public BufferedReader inFromClient = null;
     public DataOutputStream outToClient = null;
-   
+   /**
+    * Constructs a monster with a specific name.
+    * @param name
+    */
     public Monster(String name) {
         this.name = name;
     }

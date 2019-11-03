@@ -1,5 +1,8 @@
 package tokyoking.game;
 
+import tokyoking.monsters.Alienoid;
+import tokyoking.monsters.Gigazaur;
+import tokyoking.monsters.Kong;
 import tokyoking.monsters.Monster;
 import tokyoking.SendMessage;
 import tokyoking.deck.Deck;
@@ -10,18 +13,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-
+/**
+ * @author Tom Hammarkvist
+ * In this class you will find all the logic for the actual game.
+ * 
+ */
 public class Game{
 
-    private SendMessage message = new SendMessage();
+    private SendMessage message;
     private String rolledDice;
     private String[] reroll;
 
-    public Game(){
-
+    public Game(SendMessage msg){
+        this.message = msg;
     }
     public void buyWithEnergy(Deck deck, int buyer, Monster monster, ArrayList<Monster>monsterList){
-        String msg = "PURCHASE:Do you want to buy any of the cards from the store? (you have " + monster.getEnergy() + " energy) [#/-1]:" + deck + "\n";
+        String msg = "PURCHASE:Do you want to buy any of the cards from the store? (you have " + monster.getEnergy() + " energy) (reset: 3) [-1 to leave store]:" + deck + "\n";
         String answer = message.sendMessage(buyer, msg, monsterList);
         int buy = Integer.parseInt(answer);
         if(buy ==3 && monster.getEnergy() >= 2){
@@ -32,29 +39,35 @@ public class Game{
             System.out.println("Not enough Energy to reset store!");
         }
         else if(buy>=0 && (monster.getEnergy() >= (deck.getStoreCard(buy).getCost() - monster.cardEffect("cardsCostLess")) && buy < 3)) { //Alien Metabolism
-            //System.out.println("HEJ");
             if(deck.getStoreCard(buy).getDiscard()) {
                 //7a. Play "DISCARD" cards immediately
-                //currentMonster.stars += deck.store[buy].effect.stars;
                 monster.setStars(monster.getStars() + deck.getStoreCard(buy).getEffect().getStars());
+                monster.setEnergy(monster.getEnergy() + deck.getStoreCard(buy).getEffect().getEnergy());
             } else
                 monster.cards.add(deck.getStoreCard(buy));
             //Deduct the cost of the card from energy
-           // currentMonster.energy += -(deck.store[buy].cost-currentMonster.cardEffect("cardsCostLess")); //Alient Metabolism
             monster.setEnergy(monster.getEnergy()-(deck.getStoreCard(buy).getCost() - monster.cardEffect("cardsCostLess")));
             //Draw a new card from the deck to replace the card that was bought
             deck.setStoreCard(buy,deck.getDeck().remove(0));
         }        
     }
-    public void checkVictory(ArrayList<Monster>monsterList, Monster monster){
-        int alive=0; String aliveMonster = "";
+    
+    public boolean checkWinByStars(ArrayList<Monster>monsterList){
         for(int mon=0; mon<monsterList.size(); mon++) {
             if(monsterList.get(mon).getStars() >= 20) {
                 for(int victory=0; victory<monsterList.size(); victory++) {
                     message.sendMessage(victory, "Victory: " + monsterList.get(mon).getName() + " has won by stars\n", monsterList);
+                    return true;
                 }
-                System.exit(0);
             }
+        }
+        return false;
+    }
+
+    public boolean checkWinByLoneSurvivor(ArrayList<Monster>monsterList){
+        int alive = 0;
+        String aliveMonster = "";
+        for(int mon=0; mon<monsterList.size(); mon++){
             if(monsterList.get(mon).getCurrentHealth() > 0) {
                 alive++; 
                 aliveMonster = monsterList.get(mon).getName();
@@ -63,11 +76,25 @@ public class Game{
         if(alive==1) {
             for(int victory=0; victory<monsterList.size(); victory++) {
                 message.sendMessage(victory, "Victory: " + aliveMonster + " has won by being the only one alive\n", monsterList);
+                return true;
             } 
+            
+        }
+        return false; 
+    }
+
+    /**
+     * Check if any monsters has reached a victory condition, and if thats true, quit the game.
+     * @param monsterList
+     */
+
+    public void isGameOver(ArrayList<Monster>monsterList){
+        if(checkWinByLoneSurvivor(monsterList) || checkWinByStars(monsterList)){
             System.exit(0);
-        }        
+        }
     }
     
+
     public void wannaLeaveTokyo(int monsterIndex, boolean isMonsterInTokyo, ArrayList<Monster>monsterList){
         String answer = message.sendMessage(monsterIndex, "ATTACKED:You have " + 
         monsterList.get(monsterIndex).getCurrentHealth() + " health left. Do you wish to leave Tokyo? [YES/NO]\n", monsterList);
@@ -76,20 +103,37 @@ public class Game{
         isMonsterInTokyo = false;
     }       
     }
+    /**
+     * Attacks a monster in tokyo if you are outside tokyo.
+     * @param monsterList
+     * @param monster
+     * @param res
+     * @param clawDice
+     * @param theGame
+     * @param monInTokyo
+     */
     public void attackInTokyo(ArrayList<Monster>monsterList, Monster monster, HashMap<Dice, Integer> res, Dice clawDice, Game theGame, boolean monInTokyo){
+        monInTokyo = false;
         for(int mon=0; mon<monsterList.size(); mon++) {
             if(monsterList.get(mon).getInTokyo()){
                 monInTokyo = true;
                 int moreDamage = monster.cardEffect("moreDamage"); //Acid Attack
                 int totalDamage = res.get(clawDice).intValue()+moreDamage;
-                if(totalDamage > monsterList.get(mon).cardEffect("armor")) //Armor Plating
+                if(totalDamage > monsterList.get(mon).cardEffect("armor")){ //Armor Plating
                     monsterList.get(mon).setCurrentHealth(monsterList.get(mon).getCurrentHealth()-totalDamage);
+                }
                 // 6e. If you were outside, then the monster inside tokyo may decide to leave Tokyo
                 theGame.wannaLeaveTokyo(mon,monInTokyo, monsterList);
             }
         }        
     }
 
+
+    /**
+     * Check if you rolled three dices with the same value of either ONE, TWO or THREE
+     * @param res
+     * @param monster
+     */
     public void threeOfANumber(HashMap<Dice, Integer> res, Monster monster){
         for(int num = 1; num < 4; num++) {
             if(res.containsKey(new Dice(num)))
@@ -106,6 +150,30 @@ public class Game{
                 monsterList.get(mon).setCurrentHealth(monsterList.get(mon).getCurrentHealth()-totalDamage);
             }
         }        
+    }
+
+    /**
+     * If you rolled three or more hearts, check which monster did and give it a evolution powerup.
+     * @param monsterList
+     * @param monster
+     * @param mKong
+     * @param mGiga
+     * @param mAlien
+     * @param index
+     */
+    public void moreThanThreeHeartsNameChecker(ArrayList<Monster>monsterList, Monster monster,Kong mKong, Gigazaur mGiga,  Alienoid mAlien,int index){
+        if(monster.getName().equals("Kong")) {
+
+            mKong.randomizeKongEvo(mKong, index, message, monsterList);
+        }
+        if(monster.getName().equals("Gigazaur")) {
+
+            mGiga.randomizeGigaEvo(mGiga, index, monsterList, message);    
+        }
+        if(monster.getName().equals("Alienoid")) {
+
+            mAlien.randomizeAlienEvo(mAlien, index, message, monsterList);
+        }
     }
 
     public void increaseHealth(HashMap<Dice, Integer> res, Dice heartDice, Monster monster){
@@ -156,7 +224,6 @@ public class Game{
     }
 
     public void increaseStars(Monster monster, int amount){
-        //    monster.stars +=1;
                 monster.setStars(monster.getStars()+amount);
             }    
 

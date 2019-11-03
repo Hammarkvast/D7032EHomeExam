@@ -2,8 +2,13 @@ package tokyoking.cards.storecards;
 
 import tokyoking.cards.Card;
 import tokyoking.effects.Effect;
-
+/**
+ * @author Tom Hammarkvist
+ */
 public class AcidAttack extends Card{
+    /**
+     * Creates the Acid attack store card
+     */
     private Effect moreDamage = new Effect();
 
     public AcidAttack() {

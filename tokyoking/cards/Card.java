@@ -3,6 +3,10 @@ import tokyoking.effects.Effect;
 
 public class Card {
 
+    /**
+     * The class that creates all the store cards when extended.
+     */
+
     private String name;
     private int cost;
     private boolean discard;

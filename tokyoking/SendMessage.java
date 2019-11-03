@@ -2,17 +2,16 @@ package tokyoking;
 
 import tokyoking.monsters.Monster;
 import java.util.Scanner;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.net.Socket;
-import java.net.ServerSocket;
 import java.util.ArrayList;
+/**
+ * @author Tom Hammarkvist
+ */
 public class SendMessage{
     private Scanner sc = new Scanner(System.in);
-    public SendMessage(){
-        
-    }
+
+    /**
+     * Sends out messages to the terminal.
+     */
     public String sendMessage(int recipient, String message,ArrayList<Monster>monsterList) {
         Monster aMonster = monsterList.get(recipient);
         String response = "";
